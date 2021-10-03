@@ -49,6 +49,6 @@ const planSchema = new mongoose.Schema({
 // order matters 
 // middleware 
 
-const planModel = mongoose.model("planModel", planSchema);
+const PlanModel = mongoose.model("planModel", planSchema);
 
-module.exports = planModel;
+module.exports = PlanModel;

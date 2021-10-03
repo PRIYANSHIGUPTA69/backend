@@ -2,50 +2,96 @@ const express = require("express");
 const userModel = require("../models/userModel");
 const userRouter = express.Router();
 const protectedRoute = require("./authHelper")
+const factory = require("../helper/factory");
+const createUser = factory.createElement(userModel);
+const getUsers = factory.getElements(userModel);
+const deleteUser = factory.deleteElement(userModel);
+const updateUser = factory.updateElement(userModel);
+const getUserById = factory.getElementById(userModel);
+userRouter
+    .route("/:id")
+    .get(protectedRoute, authorizeUser(["admin", "manager"]), getUserById)
+    .patch(updateUser)
+    .delete(protectedRoute, authorizeUser(["admin"]), deleteUser);
+// ****************************************************
 userRouter
     .route("/")
-    .get( protectedRoute , getUser)
-    .post(createUser)
-    .patch(updateUser)
-    .delete(deletUser);
+    .get(protectRoute, authorizeUser(["admin"]), getUsers)
+    .post(
+        protectRoute, authorizeUser(["admin"]), createUser
+    )
+// Homework 
+// findBYIdAndUpdate ->
 
+// original code 
+// async function createUser(req, res) {
+//     try {
+//         let user = req.body;
+//         if (user) {
+//             user = await userModel.create(plan);
+//             res.status(200).json({
+//                 user: user
+//             });
+//         } else {
+//             res.status(200).json({
+//                 message: "kindly enter user's data"
+//             });
+//         }
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).json({
+//             message: "Server error"
+//         });
+//     }
+// }
+// async function getUsers(req, res) {
+//     try {
+//         let users = await userModel.find();
+//         res.status(200).json({
+//             "message": "list of all the users",
+//             users: users
+//         })
+//     } catch (err) {
+//         res.status(500).json({
+//             error: err.message,
+//             "message": "can't get users"
+//         })
+//     }
 
+//     // for sending key value pair
+// }
+// function updateUser(req, res) {
+//     let obj = req.body;
+//     for (let key in obj) {
+//         user[key] = obj[key];
+//     }
+//     res.status(200).json(user);
+// }
+// // findByIdnDelete
 
-    function createUser(req, res) {
-        console.log("req.data", req.body);
-        user = req.body;
-        res.status(200).send("data recieved and user added ");
-    }
-   async function getUser(req, res) {
-       try{
-        let user = await userModel.find()
-        res.status(200).json({
-            message:"list of all user",
-            user
-        });
-       }catch(err){
-           res.send(500).json({
-               error:err.message,
-               message:"can't get all users"
-           })
-       }
-        
-        // for sending key value pair
-    }
-    function updateUser(req, res) {
-        let obj = req.body;
-        for (let key in obj) {
-            user[key] = obj[key];
+// function deleteUser(req, res) {
+//     user = {}
+//     res.status(200).json(user);
+// }
+// // id
+// function getUserById(req, res) {
+//     console.log(req.params);
+//     res.status(200).send("Hello");
+// }
+// Logic ??
+function authorizeUser(rolesArr) {
+    return async function (req, res, next) {
+        let uid = req.uid;
+        let { role } = await userModel.findById(uid);
+        let isAuthorized = rolesArr.includes(role);
+        if (isAuthorized) {
+            next();
+        } else {
+            res.status(403).json({
+                message: "user not authorized contact admin"
+            })
         }
-        res.status(200).json(user);
-    }
-    function deletUser(req, res) {
-        user = {}
-        res.status(200).json(user);
-    }
-    function getUserById(req, res) {
-        console.log(req.params);
-        res.status(200).send("Hello");
-    }
 
-  module.exports= userRouter
+    }
+}
+module.exports = userRouter;
