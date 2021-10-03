@@ -16,9 +16,9 @@ userRouter
 // ****************************************************
 userRouter
     .route("/")
-    .get(protectRoute, authorizeUser(["admin"]), getUsers)
+    .get(protectedRoute, authorizeUser(["admin"]), getUsers)
     .post(
-        protectRoute, authorizeUser(["admin"]), createUser
+        protectedRoute, authorizeUser(["admin"]), createUser
     )
 // Homework 
 // findBYIdAndUpdate ->
